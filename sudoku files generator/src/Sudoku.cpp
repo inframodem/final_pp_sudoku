@@ -83,7 +83,7 @@ void Sudoku::GenerateBoard(){
     int numerrors = (rand() % 5) + 1;
 
     for(int i = 0; i < numerrors; i++){
-        int randslot = (rand() % (finalNumSlots + 1)); 
+        int randslot = (rand() % (finalNumSlots)); 
         tuple<int, int> pos = poslist[randslot];
         int row = get<0>(pos);
         int col = get<1>(pos);

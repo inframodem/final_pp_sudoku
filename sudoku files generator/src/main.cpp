@@ -73,10 +73,11 @@ int main(int argc, char* args[]){
         return -1;
     }
 
+
     //Debug parameters
     /*
     string outpath = "puzzles/";
-    int numPuzzles = 10;
+    int numPuzzles = 100;
     int errorPercent = 10;
     bool debugmode = true;
     */
