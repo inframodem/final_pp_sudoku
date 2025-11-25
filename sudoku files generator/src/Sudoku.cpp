@@ -8,8 +8,6 @@
 int numOfSlots = 30;
 
 Sudoku::Sudoku(int erate){
-    //Initiate rand
-    srand(time(NULL));
     errorrate = erate;
     rowset.resize(9);
     colset.resize(9);
@@ -44,25 +42,28 @@ void Sudoku::GenerateBoard(){
     for(int currrow = 0; currrow < 9;  currrow++){
         for(int currcol = 0; currcol < 9;  currcol++){
             if(positions.find(make_tuple(currrow, currcol)) != positions.end()){
-                
-                for(int i = 1; i <= 9; i++){
-                    if(rowset[currrow].find(i) != rowset[currrow].end()){
+                //Get a random starting posisiton for the true random sudoku experience
+                int randnum = (rand() % 9);
+                for(int i = randnum; i <= (randnum + 8); i++){
+                    //Get the truen number from 1 - 9
+                    int truenum = (i % 9) + 1;
+                    if(rowset[currrow].find(truenum) != rowset[currrow].end()){
                         continue;
                     }
-                    if(colset[currcol].find(i) != colset[currcol].end()){
+                    if(colset[currcol].find(truenum) != colset[currcol].end()){
                         continue;
                     }
                     int currsquare = GridHelper(currrow, currcol);
-                    if(gridset[currsquare].find(i) != gridset[currsquare].end()){
+                    if(gridset[currsquare].find(truenum) != gridset[currsquare].end()){
                         continue;
                     }
 
-                    board[currrow][currcol] = i;
+                    board[currrow][currcol] = truenum;
 
-                    rowset[currrow].insert(i);
-                    colset[currcol].insert(i);
-                    gridset[currsquare].insert(i);
-                    errors++;
+                    rowset[currrow].insert(truenum);
+                    colset[currcol].insert(truenum);
+                    gridset[currsquare].insert(truenum);
+
                     break;
                 }
             }
@@ -87,17 +88,21 @@ void Sudoku::GenerateBoard(){
         int row = get<0>(pos);
         int col = get<1>(pos);
         for(int j = 1; j <= 9; j++){
+            //For errors I'm not going to use a
             if(rowset[row].find(j) != rowset[row].end()){
                 board[row][col] = j;
+                errors++;
                 break;
             }
             if(colset[col].find(i) != colset[col].end()){
                 board[row][col] = j;
+                errors++;
                 break;
             }
             int currsquare = GridHelper(row, col);
             if(gridset[currsquare].find(i) != gridset[currsquare].end()){
                 board[row][col] = j;
+                errors++;
                 break;
             }
         }
@@ -109,7 +114,7 @@ const bool Sudoku::hasErrors(){
 }
 
 int Sudoku::GridHelper(int row, int col){
-    int squarerow = (row - 1) / 3;
-    int squarecol = (col - 1) / 3;
+    int squarerow = (row) / 3;
+    int squarecol = (col) / 3;
     return  (squarerow * 3) + squarecol;
 }

@@ -11,6 +11,8 @@
 #include <vector>
 #include <set>
 #include "Sudoku.h"
+#include <string>
+#include "stdlib.h"
 
 using namespace std;
 
@@ -21,7 +23,7 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
         debugstring = "_ERROR";
     }
 
-    string filename = "puzzle_" + num + debugstring + ".txt";
+    string filename = "puzzle_" + to_string(num) + debugstring + ".txt";
 
     ofstream out(outpath + filename);
 
@@ -29,10 +31,10 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
         string line = "";
         for(int col = 0; col < 9; col++){
             if(col < 8){
-                line += puz.getSlot(col, row) + " ";
+                line += to_string(puz.getSlot(col, row)) + " ";
             }
             else{
-                line += puz.getSlot(col, row) + "\n";
+                line += to_string(puz.getSlot(col, row)) + "\n";
             }
 
         }
@@ -43,8 +45,10 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
 }
 
 int main(int argc, char* args[]){
-    /*
-    if (argc != 4){
+    //initiate rand
+    srand(time(NULL));
+
+    if (argc != 5){
         cout << "usage: program output_path number_of_puzzles error_rate debug_toggle" << endl;
         return -1;
     }
@@ -68,12 +72,14 @@ int main(int argc, char* args[]){
         cout << "usage: program output_path number_of_puzzles error_rate debug_toggle" << endl;
         return -1;
     }
-    */
+
     //Debug parameters
+    /*
     string outpath = "puzzles/";
-    int numPuzzles = 1;
-    int errorPercent = 100;
+    int numPuzzles = 10;
+    int errorPercent = 10;
     bool debugmode = true;
+    */
     for(int puzzle = 0; puzzle < numPuzzles; puzzle++){
         Sudoku* currsudoku = new Sudoku(errorPercent);
 
