@@ -6,6 +6,7 @@
 using namespace std;
 class Sudoku {
         public:
+            //functions
             Sudoku(int errorate);
             int getSlot(int col, int row);
             const bool hasErrors();
@@ -14,10 +15,11 @@ class Sudoku {
         private:
             int errors;
             int errorrate;
-
+            //sudoku checklists
             vector<set<int>> rowset;
             vector<set<int>> colset;
             vector<set<int>> gridset;
+            //THE BOARD
             vector<vector<int>> board;
 
             void GenerateBoard();

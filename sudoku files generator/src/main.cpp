@@ -47,7 +47,7 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
 int main(int argc, char* args[]){
     //initiate rand
     srand(time(NULL));
-
+    //Set up execution variables
     if (argc != 5){
         cout << "usage: program output_path number_of_puzzles error_rate debug_toggle" << endl;
         return -1;
@@ -82,6 +82,7 @@ int main(int argc, char* args[]){
     bool debugmode = true;
     */
     for(int puzzle = 0; puzzle < numPuzzles; puzzle++){
+        //This heap allocation is completly unneccessary as it goes out of scope at each loop cycle, but I don't care.
         Sudoku* currsudoku = new Sudoku(errorPercent);
 
         puzzleOut(*currsudoku, puzzle, debugmode, outpath);

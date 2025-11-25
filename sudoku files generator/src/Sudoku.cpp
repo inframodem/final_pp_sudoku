@@ -20,14 +20,14 @@ Sudoku::Sudoku(int erate){
 
     GenerateBoard();
 }
-
+//getter for number in a board position
 int Sudoku::getSlot(int col, int row){
     if(row > 8 || row < 0 || col > 8 || col < 0){
         return -1;
     }
     return board[row][col];
 }
-
+//generates the board
 void Sudoku::GenerateBoard(){
 
     set<tuple<int, int>> positions;
@@ -45,7 +45,7 @@ void Sudoku::GenerateBoard(){
                 //Get a random starting posisiton for the true random sudoku experience
                 int randnum = (rand() % 9);
                 for(int i = randnum; i <= (randnum + 8); i++){
-                    //Get the truen number from 1 - 9
+                    //Get the true number from 1 - 9
                     int truenum = (i % 9) + 1;
                     if(rowset[currrow].find(truenum) != rowset[currrow].end()){
                         continue;
@@ -57,7 +57,7 @@ void Sudoku::GenerateBoard(){
                     if(gridset[currsquare].find(truenum) != gridset[currsquare].end()){
                         continue;
                     }
-
+                    //Add the number to board and checklists
                     board[currrow][currcol] = truenum;
 
                     rowset[currrow].insert(truenum);
@@ -78,6 +78,7 @@ void Sudoku::GenerateBoard(){
         return;
     }
 
+    //Get a random number of errors 1 - 5 to add to the board
     vector<tuple<int, int>> poslist(positions.begin(), positions.end());
     int finalNumSlots = poslist.size();
     int numerrors = (rand() % 5) + 1;
@@ -88,7 +89,9 @@ void Sudoku::GenerateBoard(){
         int row = get<0>(pos);
         int col = get<1>(pos);
         for(int j = 1; j <= 9; j++){
-            //For errors I'm not going to use a
+            //For errors I'm not going to use a random starting position
+            //check if the error belongs to any checklists
+            //changes it if so creating an error
             if(rowset[row].find(j) != rowset[row].end()){
                 board[row][col] = j;
                 errors++;
@@ -109,10 +112,12 @@ void Sudoku::GenerateBoard(){
     }
 }
 
+//error checker
 const bool Sudoku::hasErrors(){
     return errors > 0;
 }
-
+//The grid helper helps with the grid
+//Gets which square the position belongs to
 int Sudoku::GridHelper(int row, int col){
     int squarerow = (row) / 3;
     int squarecol = (col) / 3;
