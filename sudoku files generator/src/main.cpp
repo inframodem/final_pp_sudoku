@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include <Sudoku.h>
+#include "Sudoku.h"
 
 using namespace std;
 
@@ -35,7 +35,6 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
                 line += puz.getSlot(col, row) + "\n";
             }
 
-
         }
         out << line;
     }
@@ -44,7 +43,7 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
 }
 
 int main(int argc, char* args[]){
-
+    /*
     if (argc != 4){
         cout << "usage: program output_path number_of_puzzles error_rate debug_toggle" << endl;
         return -1;
@@ -69,7 +68,12 @@ int main(int argc, char* args[]){
         cout << "usage: program output_path number_of_puzzles error_rate debug_toggle" << endl;
         return -1;
     }
-
+    */
+    //Debug parameters
+    string outpath = "puzzles/";
+    int numPuzzles = 1;
+    int errorPercent = 100;
+    bool debugmode = true;
     for(int puzzle = 0; puzzle < numPuzzles; puzzle++){
         Sudoku* currsudoku = new Sudoku(errorPercent);
 
