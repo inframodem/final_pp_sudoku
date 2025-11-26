@@ -21,7 +21,7 @@ class Sudoku {
             vector<set<int>> gridset;
             //THE BOARD
             vector<vector<int>> board;
-
+            //Private functions
             void GenerateBoard();
             int GridHelper(int row, int col);
 
