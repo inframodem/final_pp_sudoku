@@ -46,8 +46,10 @@ void puzzleOut(Sudoku& puz, int num, bool debugmode, string outpath){
 
 int main(int argc, char* args[]){
     //initiate rand
-    srand(time(NULL));
+    srand(time(0));
+    //srand(100);
     //Set up execution variables
+
     if (argc != 5){
         cout << "usage: program output_path number_of_puzzles error_rate debug_toggle" << endl;
         return -1;
@@ -78,7 +80,7 @@ int main(int argc, char* args[]){
     /*
     string outpath = "puzzles/";
     int numPuzzles = 100;
-    int errorPercent = 10;
+    int errorPercent = 100;
     bool debugmode = true;
     */
     for(int puzzle = 0; puzzle < numPuzzles; puzzle++){

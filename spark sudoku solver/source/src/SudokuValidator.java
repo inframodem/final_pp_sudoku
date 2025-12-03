@@ -32,7 +32,7 @@ public class SudokuValidator {
         JavaSparkContext jsc = new JavaSparkContext( conf );
 	JavaPairRDD<String, String> files = jsc.wholeTextFiles(inputFolder);
 
-    // define two global variables
+    // define one global variables
 	LongAccumulator active = jsc.sc( ).longAccumulator( );            // # active nodes
     files.collect();
     System.err.println( "Starting Number of Nodes: " + active);
@@ -47,27 +47,27 @@ public class SudokuValidator {
 		// identify each node name
         String filename = file._1;
 		String[] lines = file._2.split("\\R");
-        System.err.println( "Working on file: " + filename );
+        //System.err.println( "Working on file: " + filename );
         int[][] board = new int[9][9];
-        System.err.println( "Number of Lines: " + lines.length );
+        //System.err.println( "Number of Lines: " + lines.length );
         int crow = 0;
         for(String line : lines){
             if(crow >= 9){
                 break;
             }
-            System.err.println( "Current Line: " + line );
+            //System.err.println( "Current Line: " + line );
             String[] tokens = line.split(" ");
-            System.err.println( "Number of Tokens: " + lines.length );
+            //System.err.println( "Number of Tokens: " + lines.length );
             if(tokens.length < 9){
                 return new Tuple2<String,String>("Error", filename);
             }
             for(int i = 0; i < 9; i++){
-                System.err.println( "Current Tokens " + i +": " + tokens[i] );
+                //System.err.println( "Current Tokens " + i +": " + tokens[i] );
                 board[crow][i] = Integer.parseInt(tokens[i]);
             }
             crow++;
         }
-
+        //Set up Row, Column, and Square trackers
         HashSet<Integer>[] rowset = new HashSet[9];
         HashSet<Integer>[] colset = new HashSet[9];
         HashSet<Integer>[] squareset = new HashSet[9];
@@ -76,38 +76,39 @@ public class SudokuValidator {
             colset[i] = new HashSet<>();
             squareset[i] = new HashSet<>();
         }
-
+        //Main loop checks if current checked slot already exists in a row, column, and square
         String boardState = "Solvable";
         for(int row = 0; row < 9; row++){
             for(int col = 0; col < 9; col++){
+                //Row check
                 int slotvalue = board[row][col];
                 if(rowset[row].contains(slotvalue)){
                     boardState = "Unsolvable";
                     break;
                 }
+                //Column Check
                 if(colset[col].contains(slotvalue)){
                     boardState = "Unsolvable";
                     break;
                 }
+                //Square check
                 int squareslot = GridHelper(row, col);
                 if(squareset[squareslot].contains(slotvalue)){
                     boardState = "Unsolvable";
                     break;
                 }
-
+                //Add it if still Solvable
                 if(slotvalue != 0){
                     rowset[row].add(slotvalue);
                     colset[col].add(slotvalue);
                     squareset[squareslot].add(slotvalue);
                 }
-
-
             }
             if(boardState.equals("Unsolvable")){
                 break;
             }
         }
-		System.err.println( filename + " is " + boardState);
+		//System.err.println( filename + " is " + boardState);
 		// return each node's information
 		return new Tuple2<>( boardState, filename );
 	});

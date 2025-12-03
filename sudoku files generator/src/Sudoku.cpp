@@ -63,7 +63,6 @@ void Sudoku::GenerateBoard(){
                     rowset[currrow].insert(truenum);
                     colset[currcol].insert(truenum);
                     gridset[currsquare].insert(truenum);
-
                     break;
                 }
             }
@@ -83,28 +82,38 @@ void Sudoku::GenerateBoard(){
     int finalNumSlots = poslist.size();
     int numerrors = (rand() % 5) + 1;
 
-    for(int i = 0; i < numerrors; i++){
-        int randslot = (rand() % (finalNumSlots)); 
+    for(int i = 0; i < numerrors && !poslist.empty(); i++){
+        int randslot = (rand() % (poslist.size())); 
         tuple<int, int> pos = poslist[randslot];
         int row = get<0>(pos);
         int col = get<1>(pos);
+        poslist.erase(poslist.begin() + randslot);
+
+        int old_value = board[row][col];
+        int square = GridHelper(row, col);
+
+
         for(int j = 1; j <= 9; j++){
-            //For errors I'm not going to use a random starting position
-            //check if the error belongs to any checklists
-            //changes it if so creating an error
-            if(rowset[row].find(j) != rowset[row].end()){
+            if (j == old_value){
+                continue;
+            } 
+
+            if (rowset[row].count(j) ||
+                colset[col].count(j) ||
+                gridset[square].count(j))
+            {
+                // assign new erroneous value
                 board[row][col] = j;
-                errors++;
-                break;
-            }
-            if(colset[col].find(i) != colset[col].end()){
-                board[row][col] = j;
-                errors++;
-                break;
-            }
-            int currsquare = GridHelper(row, col);
-            if(gridset[currsquare].find(i) != gridset[currsquare].end()){
-                board[row][col] = j;
+
+                // update sets
+                rowset[row].erase(old_value);
+                colset[col].erase(old_value);
+                gridset[square].erase(old_value);
+
+                rowset[row].insert(j);
+                colset[col].insert(j);
+                gridset[square].insert(j);
+
                 errors++;
                 break;
             }
