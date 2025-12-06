@@ -143,6 +143,8 @@ public class SudokuValidator {
                 continue;
             }
 
+            boolean foundValid = false;
+
             for(int i = currentNumber; i <= 9; i++){
                 int squareslot = GridHelper(row, col);
                 if(!rowset[row].contains(i) && !colset[col].contains(i) && !squareset[squareslot].contains(i)){
@@ -155,11 +157,16 @@ public class SudokuValidator {
                     board[row][col] = i;
                     trackStack.push(stackElement);
                     currentPosTuple2 = posIncrementHelper(currentPosTuple2);
-                    continue;
+                    foundValid = true;
+                    break;
                 }
             }
 
-            //Failed to find valid number backtrack
+            if(foundValid){
+                continue;
+            }
+
+            //Failed to find valid number so backtracking
             Tuple2<Integer,Tuple2<Integer, Integer>> stackElement = trackStack.pop();
             currentPosTuple2 = stackElement._2;
             currentNumber = stackElement._1;
@@ -172,7 +179,7 @@ public class SudokuValidator {
             squareset[squareslot].remove(currentNumber);
 
         }
-        
+
         filename += " ";
         for(int row = 0; row < 9; row++){
             for(int col = 0; col < 9; col++){
