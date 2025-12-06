@@ -8,6 +8,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.util.LongAccumulator;
 import scala.Tuple2;
 
+
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -17,6 +18,25 @@ public class SudokuValidator {
         int srow = row / 3;
         int scol = col / 3;
         return (srow * 3) + scol;
+    }
+
+    private static Tuple2<Integer, Integer> posIncrementHelper(Tuple2<Integer, Integer> curPos){
+        int row = curPos._1;
+        int col = curPos._2;
+
+        if(row + 1 > 8){
+            row = -1;
+            col = -1;
+        }
+        else if(col + 1 > 8) {
+            col = 0;
+            row += 1;
+        }
+        else{
+            col += 1;
+        }
+
+        return new Tuple2<Integer,Integer>(row, col);
     }
     public static void main(String[] args) {
 	// validate arguments.
@@ -64,6 +84,7 @@ public class SudokuValidator {
             for(int i = 0; i < 9; i++){
                 //System.err.println( "Current Tokens " + i +": " + tokens[i] );
                 board[crow][i] = Integer.parseInt(tokens[i]);
+                
             }
             crow++;
         }
@@ -82,18 +103,8 @@ public class SudokuValidator {
             for(int col = 0; col < 9; col++){
                 //Row check
                 int slotvalue = board[row][col];
-                if(rowset[row].contains(slotvalue)){
-                    boardState = "Unsolvable";
-                    break;
-                }
-                //Column Check
-                if(colset[col].contains(slotvalue)){
-                    boardState = "Unsolvable";
-                    break;
-                }
-                //Square check
                 int squareslot = GridHelper(row, col);
-                if(squareset[squareslot].contains(slotvalue)){
+                if(rowset[row].contains(slotvalue) || colset[col].contains(slotvalue) || squareset[squareslot].contains(slotvalue)){
                     boardState = "Unsolvable";
                     break;
                 }
@@ -110,7 +121,65 @@ public class SudokuValidator {
         }
 		//System.err.println( filename + " is " + boardState);
 		// return each node's information
-		return new Tuple2<>( boardState, filename );
+        if(boardState == "Unsolvable"){
+            return new Tuple2<>( boardState, filename );
+        }
+
+        Stack<Tuple2<Integer,Tuple2<Integer, Integer>>> trackStack = new Stack<>();
+        Tuple2<Integer, Integer> currentPosTuple2 = new Tuple2<>(0,0);
+        int currentNumber = 1;
+        boolean isRunning = true;
+
+        while(isRunning){
+            int row = currentPosTuple2._1;
+            int col = currentPosTuple2._2;
+            if(row < 0 && col < 0){
+                isRunning = false;
+                break;
+            }
+            //Already filled Slot
+            if(board[row][col] != 0){
+                currentPosTuple2 = posIncrementHelper(currentPosTuple2); 
+                continue;
+            }
+
+            for(int i = currentNumber; i <= 9; i++){
+                int squareslot = GridHelper(row, col);
+                if(!rowset[row].contains(i) && !colset[col].contains(i) && !squareset[squareslot].contains(i)){
+
+                    currentNumber = 1;
+                    Tuple2<Integer,Tuple2<Integer, Integer>> stackElement = new Tuple2<>(i,currentPosTuple2);
+                    rowset[row].add(i);
+                    colset[col].add(i);
+                    squareset[squareslot].add(i);
+                    board[row][col] = i;
+                    trackStack.push(stackElement);
+                    currentPosTuple2 = posIncrementHelper(currentPosTuple2);
+                    continue;
+                }
+            }
+
+            //Failed to find valid number backtrack
+            Tuple2<Integer,Tuple2<Integer, Integer>> stackElement = trackStack.pop();
+            currentPosTuple2 = stackElement._2;
+            currentNumber = stackElement._1;
+            row = currentPosTuple2._1;
+            col = currentPosTuple2._2;
+            int squareslot = GridHelper(row, col);
+            board[row][col] = 0;
+            rowset[row].remove(currentNumber);
+            colset[col].remove(currentNumber);
+            squareset[squareslot].remove(currentNumber);
+
+        }
+        
+        filename += " ";
+        for(int row = 0; row < 9; row++){
+            for(int col = 0; col < 9; col++){
+                filename += board[row][col];
+            }
+        }
+        return new Tuple2<>( boardState, filename );
 	});
 
     JavaPairRDD<String, Iterable<String>> filesgrouped = fileMatchs.groupByKey();
@@ -129,7 +198,6 @@ public class SudokuValidator {
             for(String file : filelist){
                 fout.println(file);
                 
-
             }
             fout.println();
 
