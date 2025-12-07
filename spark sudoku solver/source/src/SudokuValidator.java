@@ -24,18 +24,18 @@ public class SudokuValidator {
         int row = curPos._1;
         int col = curPos._2;
 
-        if(row + 1 > 8){
-            row = -1;
-            col = -1;
-        }
-        else if(col + 1 > 8) {
-            col = 0;
-            row += 1;
+      if(col + 1 > 8) {  // Moving past last column
+            if(row + 1 > 8) {  // And already on last row
+                row = -1;
+                col = -1;
+            } else {
+                col = 0;
+                row += 1;
+            }
         }
         else{
             col += 1;
         }
-
         return new Tuple2<Integer,Integer>(row, col);
     }
     public static void main(String[] args) {
@@ -121,25 +121,31 @@ public class SudokuValidator {
         }
 		//System.err.println( filename + " is " + boardState);
 		// return each node's information
-        if(boardState == "Unsolvable"){
+        if(boardState.equals("Unsolvable")){
             return new Tuple2<>( boardState, filename );
         }
-
+        //Solving Portion
         Stack<Tuple2<Integer,Tuple2<Integer, Integer>>> trackStack = new Stack<>();
         Tuple2<Integer, Integer> currentPosTuple2 = new Tuple2<>(0,0);
         int currentNumber = 1;
         boolean isRunning = true;
 
+        System.err.println("Starting solver for: " + filename);
         while(isRunning){
+            //Get Board Position
             int row = currentPosTuple2._1;
             int col = currentPosTuple2._2;
+            //Board is solved
             if(row < 0 && col < 0){
                 isRunning = false;
                 break;
             }
-            //Already filled Slot
+            //Already filled Slot before solving, skip
             if(board[row][col] != 0){
+
                 currentPosTuple2 = posIncrementHelper(currentPosTuple2); 
+                //System.err.println(filename + ": Skiping to " + currentPosTuple2._1 + " " + currentPosTuple2._2);
+                currentNumber = 1;  // Reset when moving forward
                 continue;
             }
 
@@ -156,28 +162,44 @@ public class SudokuValidator {
                     squareset[squareslot].add(i);
                     board[row][col] = i;
                     trackStack.push(stackElement);
+                    //System.err.println(filename + ": Adding "+ i + " to " + currentPosTuple2._1 + " " + currentPosTuple2._2);
                     currentPosTuple2 = posIncrementHelper(currentPosTuple2);
+
+                    //System.err.println(filename + ": Moving to " + currentPosTuple2._1 + " " + currentPosTuple2._2);
                     foundValid = true;
                     break;
                 }
             }
-
+            //If a valid number was found, move to the next slot
             if(foundValid){
                 continue;
+            }
+            // No more moves to backtrack - puzzle is unsolvable
+            if(trackStack.isEmpty()){
+
+                boardState = "Unsolvable";
+                isRunning = false;
+                break;
             }
 
             //Failed to find valid number so backtracking
             Tuple2<Integer,Tuple2<Integer, Integer>> stackElement = trackStack.pop();
             currentPosTuple2 = stackElement._2;
-            currentNumber = stackElement._1;
+            int lastTriedNumber = stackElement._1;
+            //System.err.println(filename + ": Backtracking with "+ lastTriedNumber + " to " + currentPosTuple2._1 + " " + currentPosTuple2._2);
             row = currentPosTuple2._1;
             col = currentPosTuple2._2;
             int squareslot = GridHelper(row, col);
             board[row][col] = 0;
-            rowset[row].remove(currentNumber);
-            colset[col].remove(currentNumber);
-            squareset[squareslot].remove(currentNumber);
+            rowset[row].remove(lastTriedNumber);
+            colset[col].remove(lastTriedNumber);
+            squareset[squareslot].remove(lastTriedNumber);
+            currentNumber = lastTriedNumber + 1;
 
+        }
+
+        if(boardState.equals("Unsolvable")){
+            return new Tuple2<>( boardState, filename );
         }
 
         filename += " ";
@@ -191,10 +213,9 @@ public class SudokuValidator {
 
     JavaPairRDD<String, Iterable<String>> filesgrouped = fileMatchs.groupByKey();
     List<Tuple2<String, Iterable<String>>> grouplist = filesgrouped.collect();
+
 	// just for debugging
 	System.err.println( "Finished Solving Puzzles" );
-
-
     System.err.println( "Number of keys:" + grouplist.size());
 
     try(PrintWriter fout = new PrintWriter(outputFolder)){
@@ -213,7 +234,6 @@ public class SudokuValidator {
     }catch(Exception e){
         System.err.println("Error Occurred Exporting Output File!");
     }
-
 
     // stop the timer
     long endTime = System.currentTimeMillis();
